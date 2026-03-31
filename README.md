@@ -28,8 +28,8 @@ Follow these steps to get the environment ready and run the server on your machi
 
 ### 1. Clone the repository
 ```bash
-git clone [https://github.com/yourusername/gymflow-ai.git](https://github.com/yourusername/gymflow-ai.git)
-cd gymflow-ai
+git clone https://github.com/Mongkorn01/Gym-Recommendation-App.git
+cd Gym-Recommendation-App
 ```
 
 ### 2. Set up the Virtual Environment
