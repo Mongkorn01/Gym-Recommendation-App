@@ -8,7 +8,11 @@ import pandas as pd
 from prophet.serialize import model_from_json
 import json
 
+load_dotenv()
 app = Flask(__name__)
+
+PORT = int(os.getenv('FLASK_PORT', 5000))
+DEBUG = os.getenv('DEBUG_MODE', 'False').lower() == 'true'
 
 # 1. LOAD THE MODEL
 with open('gym_model.json', 'r') as f:
@@ -59,12 +63,11 @@ def predict():
     return jsonify({"error": "No slots found"}), 404
 
 if __name__ == '__main__':
-    # This prints a clean, clickable link at the end of the setup
     print("\n" + "="*50)
-    print("🚀 GYMFLOW AI SERVER IS STARTING")
-    print("🔗 Click the link below to open your app:")
-    print("   http://127.0.0.1:5000")
+    print(f"🚀 GYMFLOW AI SERVER IS STARTING")
+    print(f"🔗 URL: http://127.0.0.1:{PORT}")
+    print(f"🛠️  Debug Mode: {DEBUG}")
     print("="*50 + "\n")
     
-    # Starts the Flask server
-    app.run(debug=True, port=5000)
+    # Use the variables here
+    app.run(debug=DEBUG, port=PORT)
