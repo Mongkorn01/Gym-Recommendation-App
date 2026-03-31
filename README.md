@@ -54,8 +54,8 @@ pip install -r requirements.txt
 ### 4. Run the Application
 ```bash
 python app.py
-Once started, the server will be available at: http://127.0.0.1:5000
 ```
+Once started, the server will be available at: http://127.0.0.1:5000 (by default)
 
 ## 📂 Project Structure
 app.py: The Flask backend containing the Prophet forecasting and recommendation logic.
