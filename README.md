@@ -49,7 +49,7 @@ python -m pip install --upgrade pip
 
 ### 3. Install Dependencies
 ```bash
-pip install flask pandas prophet plotly
+pip install -r requirements.txt
 ```
 ### 4. Run the Application
 ```bash
