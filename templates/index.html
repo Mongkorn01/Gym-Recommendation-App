@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymFlow AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-2xl shadow-xl border border-slate-200 w-full max-w-4xl">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-blue-600 flex items-center gap-2">🏋️ GymFlow AI</h1>
+            <p class="text-slate-500 font-medium">Prophet-Powered Occupancy Forecasting</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Workout Type</label>
+                    <select id="workout" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="cardio">Cardio / General</option>
+                        <option value="weights">Free Weights & Racks (High Sensitivity)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Preferred Day</label>
+                    <select id="day" class="w-full p-3 border border-slate-300 rounded-lg outline-none">
+                        <option value="No Preference">No Preference</option>
+                        <option value="Monday">Monday</option><option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option><option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option><option value="Saturday">Saturday</option><option value="Sunday">Sunday</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Time Segment</label>
+                    <select id="segment" class="w-full p-3 border border-slate-300 rounded-lg outline-none">
+                        <option value="No Preference">Any Time</option>
+                        <option value="Early Bird">Early Bird (5am-8am)</option>
+                        <option value="Morning">Morning (9am-11am)</option>
+                        <option value="Lunch">Lunch (12pm-1pm)</option>
+                        <option value="Afternoon">Afternoon (2pm-4pm)</option>
+                        <option value="Peak">Peak (5pm-8pm)</option>
+                        <option value="Night">Night (9pm-11pm)</option>
+                    </select>
+                </div>
+                <button onclick="getRecommendation()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg active:scale-95">
+                    Find Best Time Slot
+                </button>
+            </div>
+
+            <div id="result-card" class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 flex flex-col justify-center items-center text-center">
+                <p id="status-text" class="text-slate-400">Select your preferences and click the button to see the AI recommendation.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function getRecommendation() {
+            const card = document.getElementById('result-card');
+            card.innerHTML = '<div class="animate-pulse text-blue-600 font-bold text-lg italic">Consulting Prophet Model...</div>';
+
+            const payload = {
+                workout: document.getElementById('workout').value,
+                day: document.getElementById('day').value,
+                segment: document.getElementById('segment').value
+            };
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+
+                card.className = "bg-blue-50 border-l-4 border-blue-500 rounded-r-2xl p-8 text-left h-full flex flex-col justify-center relative";
+                card.innerHTML = `
+                    <div class="absolute top-6 right-8 bg-green-100 text-green-700 text-xs font-black px-3 py-1 rounded-full uppercase">✨ Optimized Slot</div>
+                    <h2 class="text-3xl font-black text-slate-800 mb-1">${data.time}</h2>
+                    <p class="text-slate-500 mb-6 font-medium">Predicted Occupancy: <span class="text-slate-800">${data.occ} people</span></p>
+                    <div class="space-y-4 pt-6 border-t border-slate-200">
+                        <p class="text-slate-700"><strong>Vibe:</strong> ${data.vibe}.</p>
+                        <p class="text-slate-600 text-sm">Our model predicts a quiet window during this time. Perfect for hitting your workout without a wait.</p>
+                    </div>
+                `;
+            } catch (error) {
+                card.innerHTML = '<p class="text-red-500 font-bold">Error connecting to server. Make sure app.py is running.</p>';
+            }
+        }
+    </script>
+</body>
+</html>
