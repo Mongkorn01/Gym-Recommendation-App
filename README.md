@@ -68,5 +68,7 @@ gym_data.csv: (Optional) The raw check-in/check-out data used for training.
 
 ## 🧪 How it Works
 The backend utilizes the Prophet library to fit non-linear trends with daily and weekly seasonality. It effectively solves the "Connection Error" issues common in notebook environments by establishing a stable local Flask server to handle user requests.
-<br>
+
+---
+
 Developed with 💙 for quiet squat racks.
