@@ -21,6 +21,7 @@ GymFlow AI is a predictive analytics web application that helps users find the p
        alt="Occupancy Forecast Analytics Chart" 
        style="max-width: 700px; width: 100%; height: auto; border-radius: 8px;">
 </p>
+
 ## 🛠️ Local Setup & Installation
 
 Follow these steps to get the environment ready and run the server on your machine.
@@ -56,7 +57,7 @@ python app.py
 Once started, the server will be available at: http://127.0.0.1:5000
 ```
 
-📂 Project Structure
+## 📂 Project Structure
 app.py: The Flask backend containing the Prophet forecasting and recommendation logic.
 
 gym_model.json: The serialized/exported Prophet model.
@@ -65,7 +66,7 @@ templates/index.html: The frontend UI built with HTML and Tailwind CSS.
 
 gym_data.csv: (Optional) The raw check-in/check-out data used for training.
 
-🧪 How it Works
+## 🧪 How it Works
 The backend utilizes the Prophet library to fit non-linear trends with daily and weekly seasonality. It effectively solves the "Connection Error" issues common in notebook environments by establishing a stable local Flask server to handle user requests.
-
+<br>
 Developed with 💙 for quiet squat racks.
