@@ -1,0 +1,17 @@
+# Virtual Environment (The heavy folder)
+.venv/
+venv/
+env/
+ENV/
+
+# Secrets (Private config)
+.env
+
+# Python internals (The messy cache)
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# OS specific files
+.DS_Store
+Thumbs.db
