@@ -2,6 +2,12 @@
 
 GymFlow AI is a predictive analytics web application that helps users find the perfect time to hit the gym. By leveraging **Meta Prophet** for time-series forecasting, the app predicts crowd density and suggests the quietest slots based on specific workout types and user preferences.
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/53516d5f-21bd-48ba-9833-cda4a59e03b2" 
+       alt="GymFlow AI Interface Dashboard" 
+       style="max-width: 900px; width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+</p>
+
 ## ✨ Features
 
 - **AI-Powered Predictions**: Uses historical check-in data to forecast gym occupancy for the next 7 days.
@@ -10,11 +16,11 @@ GymFlow AI is a predictive analytics web application that helps users find the p
 - **Interactive UI**: A clean, modern dashboard built with Tailwind CSS.
 
 ## 📸 Preview
-
-![GymFlow AI Interface]<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/53516d5f-21bd-48ba-9833-cda4a59e03b2" />
-
-![Occupancy Forecast]<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/dd2ea2b8-e975-423e-b34f-7b6399e3943c" />
-
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/dd2ea2b8-e975-423e-b34f-7b6399e3943c" 
+       alt="Occupancy Forecast Analytics Chart" 
+       style="max-width: 700px; width: 100%; height: auto; border-radius: 8px;">
+</p>
 ## 🛠️ Local Setup & Installation
 
 Follow these steps to get the environment ready and run the server on your machine.
