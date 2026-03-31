@@ -3,10 +3,10 @@
 # .venv\Scripts\Activate
 # pip install flask pandas prophet plotly
 # python app.py
+import os
+from dotenv import load_dotenv 
 from flask import Flask, render_template, request, jsonify
-import pandas as pd
 from prophet.serialize import model_from_json
-import json
 
 load_dotenv()
 app = Flask(__name__)
