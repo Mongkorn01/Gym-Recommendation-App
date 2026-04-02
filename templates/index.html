@@ -3,90 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GymFlow AI</title>
+    <title>GymFlow AI | Final Optimizer</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .active-day { border-color: #2563eb; background-color: #eff6ff; color: #1e40af; }
+        .hidden-step { display: none !important; }
+    </style>
 </head>
-<body class="bg-slate-50 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded-2xl shadow-xl border border-slate-200 w-full max-w-4xl">
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-blue-600 flex items-center gap-2">🏋️ GymFlow AI</h1>
-            <p class="text-slate-500 font-medium">Prophet-Powered Occupancy Forecasting</p>
+<body class="bg-slate-50 min-h-screen p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        
+        <div class="mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tighter italic">Gym<span class="text-blue-600">Flow</span> AI</h1>
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Select > Customize > Result</p>
+            </div>
+            <button onclick="downloadSchedule()" id="download-btn" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-black uppercase shadow-lg transition-all">
+                Download Plan
+            </button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Workout Type</label>
-                    <select id="workout" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option value="cardio">Cardio / General</option>
-                        <option value="weights">Free Weights & Racks (High Sensitivity)</option>
-                    </select>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <div class="lg:col-span-4 space-y-6">
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                    <label class="block text-xs font-black text-slate-400 uppercase mb-4 tracking-widest">1. Select Training Days</label>
+                    <div id="day-selector" class="grid grid-cols-4 gap-2"></div>
                 </div>
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Preferred Day</label>
-                    <select id="day" class="w-full p-3 border border-slate-300 rounded-lg outline-none">
-                        <option value="No Preference">No Preference</option>
-                        <option value="Monday">Monday</option><option value="Tuesday">Tuesday</option>
-                        <option value="Wednesday">Wednesday</option><option value="Thursday">Thursday</option>
-                        <option value="Friday">Friday</option><option value="Saturday">Saturday</option><option value="Sunday">Sunday</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Time Segment</label>
-                    <select id="segment" class="w-full p-3 border border-slate-300 rounded-lg outline-none">
-                        <option value="No Preference">Any Time</option>
-                        <option value="Early Bird">Early Bird (5am-8am)</option>
-                        <option value="Morning">Morning (9am-11am)</option>
-                        <option value="Lunch">Lunch (12pm-1pm)</option>
-                        <option value="Afternoon">Afternoon (2pm-4pm)</option>
-                        <option value="Peak">Peak (5pm-8pm)</option>
-                        <option value="Night">Night (9pm-11pm)</option>
-                    </select>
-                </div>
-                <button onclick="getRecommendation()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg active:scale-95">
-                    Find Best Time Slot
+
+                <div id="config-stack" class="space-y-3"></div>
+
+                <button onclick="prepareChecklist()" id="prepare-btn" class="hidden w-full bg-slate-900 text-white font-black py-4 rounded-2xl shadow-xl uppercase text-xs tracking-widest hover:bg-blue-600 transition-all">
+                    Next: Filter Exercises
                 </button>
             </div>
 
-            <div id="result-card" class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 flex flex-col justify-center items-center text-center">
-                <p id="status-text" class="text-slate-400">Select your preferences and click the button to see the AI recommendation.</p>
+            <div id="main-content" class="lg:col-span-8 space-y-6">
+                <div id="placeholder-box" class="h-64 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-[3rem] text-slate-400 bg-white/50">
+                    <p class="font-bold text-center px-6">Select your training days and splits to begin.</p>
+                </div>
+                
+                <div id="checklist-container" class="hidden-step space-y-6"></div>
+                <div id="final-schedule" class="hidden-step space-y-6"></div>
             </div>
         </div>
     </div>
 
     <script>
-        async function getRecommendation() {
-            const card = document.getElementById('result-card');
-            card.innerHTML = '<div class="animate-pulse text-blue-600 font-bold text-lg italic">Consulting Prophet Model...</div>';
+        const routines = {
+            "Chest Day": [{n:"Bench Press",t:12}, {n:"Incline Bench",t:10}, {n:"Cable Flies",t:10}, {n:"Gorilla Flies",t:10}, {n:"Bicep Curls",t:10}, {n:"Hammer Curls",t:10}],
+            "Back Day": [{n:"Lat Pulldown",t:12}, {n:"Seated Rows",t:10}, {n:"One Arm Pull",t:10}, {n:"Straight Arm Pulldown",t:10}, {n:"Facepulls",t:10}, {n:"Trex",t:10}],
+            "Shoulder/Tricep": [{n:"Shoulder Press",t:12}, {n:"Lateral Raises",t:10}, {n:"Archer Pull",t:10}, {n:"Tricep Pushdown",t:10}, {n:"Tricep Overhead",t:10}],
+            "Leg Day": [{n:"Squat/Leg Press",t:15}, {n:"Leg Extension",t:10}, {n:"Leg Curl",t:10}, {n:"Calf Raises",t:10}, {n:"Crunches",t:10}, {n:"Leg Raised",t:10}, {n:"Glute",t:10}, {n:"Thigh",t:10}]
+        };
 
-            const payload = {
-                workout: document.getElementById('workout').value,
-                day: document.getElementById('day').value,
-                segment: document.getElementById('segment').value
-            };
+        const segmentRanges = {
+            "No Preference": "24 Hours",
+            "Early Bird": "5am-8am", 
+            "Morning": "9am-11am", 
+            "Lunch": "12pm-1pm",
+            "Afternoon": "2pm-4pm", 
+            "Peak": "5pm-8pm", 
+            "Night": "9pm-11pm"
+        };
 
-            try {
-                const response = await fetch('/predict', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(payload)
-                });
-                const data = await response.json();
+        const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        let userPrefs = JSON.parse(localStorage.getItem('gymFlowPrefs')) || { selectedDays: [], configs: {} };
 
-                card.className = "bg-blue-50 border-l-4 border-blue-500 rounded-r-2xl p-8 text-left h-full flex flex-col justify-center relative";
-                card.innerHTML = `
-                    <div class="absolute top-6 right-8 bg-green-100 text-green-700 text-xs font-black px-3 py-1 rounded-full uppercase">✨ Optimized Slot</div>
-                    <h2 class="text-3xl font-black text-slate-800 mb-1">${data.time}</h2>
-                    <p class="text-slate-500 mb-6 font-medium">Predicted Occupancy: <span class="text-slate-800">${data.occ} people</span></p>
-                    <div class="space-y-4 pt-6 border-t border-slate-200">
-                        <p class="text-slate-700"><strong>Vibe:</strong> ${data.vibe}.</p>
-                        <p class="text-slate-600 text-sm">Our model predicts a quiet window during this time. Perfect for hitting your workout without a wait.</p>
-                    </div>
-                `;
-            } catch (error) {
-                card.innerHTML = '<p class="text-red-500 font-bold">Error connecting to server. Make sure app.py is running.</p>';
+        const dayGrid = document.getElementById('day-selector');
+        dayNames.forEach(day => {
+            const b = document.createElement('button');
+            b.className = `p-2 text-[10px] font-black border-2 rounded-xl transition-all uppercase ${userPrefs.selectedDays.includes(day) ? 'active-day' : 'border-slate-100 text-slate-400'}`;
+            b.innerText = day.substring(0,3);
+            b.onclick = () => toggleDay(day, b);
+            dayGrid.appendChild(b);
+        });
+
+        function toggleDay(day, btn) {
+            if(userPrefs.selectedDays.includes(day)) {
+                userPrefs.selectedDays = userPrefs.selectedDays.filter(d => d !== day);
+                btn.className = "p-2 text-[10px] font-black border-2 border-slate-100 rounded-xl text-slate-400 transition-all uppercase";
+            } else {
+                userPrefs.selectedDays.push(day);
+                btn.className = "p-2 text-[10px] font-black border-2 active-day rounded-xl transition-all uppercase";
             }
+            saveAndRender();
         }
+
+        function saveAndRender() {
+            localStorage.setItem('gymFlowPrefs', JSON.stringify(userPrefs));
+            renderConfigs();
+        }
+
+        function updateConfig(day, key, val) {
+            if(!userPrefs.configs[day]) userPrefs.configs[day] = {};
+            userPrefs.configs[day][key] = val;
+            localStorage.setItem('gymFlowPrefs', JSON.stringify(userPrefs));
+        }
+
+        function renderConfigs() {
+            const stack = document.getElementById('config-stack');
+            const btn = document.getElementById('prepare-btn');
+            if(userPrefs.selectedDays.length === 0) {
+                stack.innerHTML = ""; btn.classList.add('hidden'); 
+                document.getElementById('placeholder-box').classList.remove('hidden-step');
+                return;
+            }
+            btn.classList.remove('hidden');
+            stack.innerHTML = `<label class="block text-xs font-black text-slate-400 uppercase mb-2">2. Assign Splits</label>`;
+            userPrefs.selectedDays.sort((a,b) => dayNames.indexOf(a) - dayNames.indexOf(b)).forEach(day => {
+                const conf = userPrefs.configs[day] || { workout: "Chest Day", segment: "No Preference" };
+                userPrefs.configs[day] = conf;
+                stack.innerHTML += `
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+                        <p class="font-black text-slate-700 text-xs">${day}</p>
+                        <select onchange="updateConfig('${day}', 'workout', this.value)" class="w-full text-[10px] font-bold p-2 bg-slate-50 border rounded-lg outline-none">
+                            ${Object.keys(routines).map(r => `<option value="${r}" ${conf.workout === r ? 'selected' : ''}>${r}</option>`)}
+                        </select>
+                        <select onchange="updateConfig('${day}', 'segment', this.value)" class="w-full text-[10px] font-bold p-2 bg-slate-50 border rounded-lg outline-none">
+                            ${Object.keys(segmentRanges).map(s => `<option value="${s}" ${conf.segment === s ? 'selected' : ''}>${s === "No Preference" ? s : s + ' (' + segmentRanges[s] + ')'}</option>`)}
+                        </select>
+                    </div>`;
+            });
+        }
+
+        function prepareChecklist() {
+            document.getElementById('placeholder-box').classList.add('hidden-step');
+            document.getElementById('final-schedule').classList.add('hidden-step');
+            const container = document.getElementById('checklist-container');
+            container.classList.remove('hidden-step');
+            
+            let html = `<h2 class="text-xl font-black text-slate-800 mb-4">3. Select Desired Exercises</h2>`;
+            userPrefs.selectedDays.sort((a,b) => dayNames.indexOf(a) - dayNames.indexOf(b)).forEach(day => {
+                const conf = userPrefs.configs[day];
+                html += `
+                <div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm">
+                    <p class="font-black text-blue-600 uppercase text-xs mb-3">${day} • ${conf.workout}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        ${routines[conf.workout].map((ex, i) => `
+                            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl cursor-pointer hover:bg-blue-50 transition-colors">
+                                <input type="checkbox" class="ex-check w-4 h-4 text-blue-600 rounded" data-day="${day}" data-name="${ex.n}" data-time="${ex.t}" checked>
+                                <span class="text-sm font-bold text-slate-700">${ex.n}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>`;
+            });
+            html += `<button onclick="runProphetOptimization()" class="w-full bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl uppercase text-xs tracking-widest hover:bg-slate-900 transition-all">Generate Clean Plan</button>`;
+            container.innerHTML = html;
+        }
+
+        async function runProphetOptimization() {
+            const checklist = document.querySelectorAll('.ex-check:checked');
+            if (checklist.length === 0) return alert("Please select at least one exercise!");
+
+            document.getElementById('placeholder-box').classList.add('hidden-step');
+            document.getElementById('checklist-container').classList.add('hidden-step');
+            
+            const finalContainer = document.getElementById('final-schedule');
+            finalContainer.classList.remove('hidden-step');
+            finalContainer.innerHTML = `<div class="p-20 text-center animate-pulse text-blue-600 font-bold">Optimizing schedule via Prophet Model...</div>`;
+
+            let finalHtml = `<h2 class="text-xl font-black text-slate-800 mb-4">Optimized Schedule</h2>`;
+            window.finalDataForDownload = [];
+
+            for (const day of userPrefs.selectedDays.sort((a,b) => dayNames.indexOf(a) - dayNames.indexOf(b))) {
+                const config = userPrefs.configs[day];
+                const checkedForDay = Array.from(document.querySelectorAll(`.ex-check[data-day="${day}"]:checked`));
+                const totalMins = checkedForDay.reduce((acc, el) => acc + parseInt(el.dataset.time), 0);
+
+                // Handle "No Preference" by passing an empty string or null so the backend skips filtering
+                const segmentValue = config.segment === "No Preference" ? "" : config.segment;
+
+                try {
+                    const response = await fetch('/predict', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ 
+                            day: day, 
+                            workout: 'weights', // Multiplier logic in app.py uses 'weights'
+                            segment: segmentValue 
+                        })
+                    });
+                    const data = await response.json();
+
+                    const startFull = data.time.split(', ')[1]; 
+                    let [time, mod] = startFull.split(' ');
+                    let [h, m] = time.split(':').map(Number);
+                    if (h === 12) h = 0; if (mod === 'PM') h += 12;
+                    const endDate = new Date(0,0,0, h, m + totalMins);
+                    const endTimeStr = endDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    window.finalDataForDownload.push({ day, workout: config.workout, time: `${startFull}-${endTimeStr}`, occupancy: data.occ, exercises: checkedForDay.map(e => e.dataset.name)});
+
+                    finalHtml += `
+                    <div class="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm">
+                        <div class="p-6 bg-slate-900 text-white flex justify-between items-center">
+                            <div>
+                                <h3 class="text-xl font-black">${day}</h3>
+                                <p class="text-blue-400 text-[10px] font-black uppercase">${config.workout}</p>
+                            </div>
+                            <div class="text-right flex flex-col items-end">
+                                <p class="text-lg font-black">${startFull} - ${endTimeStr}</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-[9px] text-slate-400 font-bold uppercase">Session: ${totalMins} Mins</span>
+                                    <span class="w-1 h-1 bg-slate-600 rounded-full"></span>
+                                    <span class="text-[9px] text-blue-400 font-bold uppercase">Crowd: ${data.occ}% (${data.vibe})</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3">
+                            ${checkedForDay.map(ex => `
+                                <div class="flex items-center gap-3 border-b border-slate-50 pb-2">
+                                    <div class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                                    <span class="text-sm font-bold text-slate-700">${ex.dataset.name}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>`;
+                } catch (e) {
+                    console.error("Fetch Error:", e);
+                }
+            }
+            finalContainer.innerHTML = finalHtml;
+            document.getElementById('download-btn').classList.remove('hidden');
+        }
+
+        function downloadSchedule() {
+            if(!window.finalDataForDownload) return;
+            let text = "GYMFLOW AI - OPTIMIZED WORKOUT PLAN\n====================================\n\n";
+            window.finalDataForDownload.forEach(d => {
+                text += `${d.day.toUpperCase()} | ${d.workout}\nTIME WINDOW: ${d.time}\nEST. OCCUPANCY: ${d.occupancy}%\n------------------------------------\n`;
+                d.exercises.forEach(e => text += `[ ] ${e}\n`);
+                text += "\n";
+            });
+            const blob = new Blob([text], {type: 'text/plain'});
+            const anchor = document.createElement('a');
+            anchor.download = "gymflow_plan.txt";
+            anchor.href = window.URL.createObjectURL(blob);
+            anchor.click();
+        }
+
+        renderConfigs();
     </script>
 </body>
 </html>
