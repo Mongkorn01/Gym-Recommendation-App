@@ -11,7 +11,7 @@ from prophet.serialize import model_from_json
 load_dotenv()
 app = Flask(__name__)
 
-PORT = int(os.getenv('FLASK_PORT', 5000))
+PORT = int(os.environ.get('PORT', 5000))
 DEBUG = os.getenv('DEBUG_MODE', 'False').lower() == 'true'
 
 # 1. LOAD THE MODEL
