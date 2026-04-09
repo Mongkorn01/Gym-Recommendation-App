@@ -1,4 +1,4 @@
-# Version 5 Final: Export model -> Follow my Github
+# Version 6: Evaluation metric
 
 # ===============================
 # People Count Time Series Forecast
@@ -177,6 +177,74 @@ def get_smart_recommendation(forecast_df, day=None, segment=None, pref_time=None
         "Predicted Occupancy": round(best_slot['yhat'], 1),
         "Vibe": "Quiet" if best_slot['yhat'] < 15 else "Moderate" if best_slot['yhat'] < 30 else "Busy"
     }
+
+from prophet.diagnostics import cross_validation, performance_metrics
+import numpy as np
+
+# ==========================================
+# 9. Evaluation (Backtesting)
+# ==========================================
+
+# 'initial': How much data to use for the first training (e.g., 30 days)
+# 'period': How often to perform a new forecast (e.g., every 7 days)
+# 'horizon': How far into the "future" to predict for each fold (7 days)
+df_cv = cross_validation(
+    model, 
+    initial='30 days', 
+    period='7 days', 
+    horizon='7 days',
+    parallel="processes" # Speeds up calculation
+)
+
+# Calculate standard metrics (MAE, RMSE, MAPE, etc.)
+df_p = performance_metrics(df_cv)
+print("\n--- Standard Metrics ---")# Calculate standard metrics (MAE, RMSE, etc.)
+df_p = performance_metrics(df_cv)
+
+print("\n--- Available Performance Metrics ---")
+# This automatically prints all columns that were successfully calculated
+print(df_p.head()) 
+
+# If you want to be specific but safe:
+cols_to_show = [c for c in ['horizon', 'mae', 'rmse', 'mape'] if c in df_p.columns]
+print("\n--- Summary Table ---")
+print(df_p[cols_to_show].head())
+
+# ==========================================
+# 10. Calculating MASE (Custom)
+# ==========================================
+
+def calculate_mase(training_data, cv_df):
+    # 1. Calculate MAE of the forecast
+    mae = np.mean(np.abs(cv_df['y'] - cv_df['yhat']))
+    
+    # 2. Calculate MAE of the "Naive" forecast on training data
+    # (The average absolute difference between consecutive actual values)
+    naive_mae = np.mean(np.abs(np.diff(training_data['y'])))
+    
+    return mae / naive_mae
+
+mase_score = calculate_mase(prophet_df, df_cv)
+print(f"\n✅ MASE Score: {round(mase_score, 4)}")
+
+if mase_score < 1:
+    print("Interpretation: Your model is performing better than a naive baseline!")
+else:
+    print("Interpretation: The model is struggling; a naive 'last-hour' forecast is more accurate.")
+
+# ==========================================
+# 10. Visualizing
+# ==========================================
+# Visualizing MAPE over the 7-day horizon
+from prophet.plot import plot_cross_validation_metric
+
+# Change 'mape' to 'mae' since 'mape' doesn't exist in your results
+try:
+    fig3 = plot_cross_validation_metric(df_cv, metric='mae')
+    plt.title("Mean Absolute Error (MAE) over 7-Day Horizon")
+    plt.show()
+except Exception as e:
+    print(f"Could not plot metric: {e}")
 
 # ==========================================
 # TEST CASES
