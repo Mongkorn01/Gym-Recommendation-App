@@ -85,6 +85,9 @@ templates/index.html: The modern frontend UI built with Tailwind CSS and LocalSt
 
 The system utilizes the Meta Prophet library to fit non-linear trends with daily and weekly seasonality. When a user requests a schedule, the backend filters the forecast by the user's preferred "Time Segment" and applies a 1.5x occupancy multiplier for weight-based workouts to ensure extra space is available for equipment-heavy sessions.
 
+## Live Demo
+👉 https://gym-recommendation-app-ryu5.onrender.com/
+> ⚠️ **Note:** The app may take a few minutes to start when first opened.
 ---
 
 Developed with 💙 for quiet squat racks.
